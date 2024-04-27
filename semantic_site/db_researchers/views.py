@@ -23,23 +23,20 @@ def researcher_types(request):
     )
 
     ret = sparql.queryAndConvert()
-    length = len(ret["results"]["bindings"])
-    count = 1
 
     for r in ret["results"]["bindings"]:
         if "researchers" in r["field"]["value"]:
-            g = Graph().parse(r["field"]["value"])
-            for subj, pred, obj in g:
-                if "rdf-schema#label" in pred:
-                    if "researchers" in obj: types.append(obj.value.replace(" ", "_"))
+            uri = r["field"]["value"][37:]
+            if ("researchers" in uri): types.append(uri)
             print(f"{count}/{length}")
-        count+=1
     return render(request, 'researcher_types.html', {'types': types})
 
 def researcher_type(request, type):
     researchers = []
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     sparql.setReturnFormat(JSON)
+
+    limit = 10
 
     sparql.setQuery("""
         PREFIX dct: <http://purl.org/dc/terms/>
@@ -48,8 +45,7 @@ def researcher_type(request, type):
         WHERE {
         ?researcher dct:subject dbc:"""+type+""".
         }
-        LIMIT 10
-        """
+        LIMIT """ + str(limit)
     )
     ret = sparql.queryAndConvert()
     length = len(ret["results"]["bindings"])
@@ -60,7 +56,7 @@ def researcher_type(request, type):
         name = ""
         desc = ""
         
-        # Iterate over triples and save English labels
+        # Iteramos sobre las tripletas y almacenamos las labels en inglés
         for subj, pred, obj in g:
             if "rdf-schema#label" in pred:
                 if obj.language == 'en': name = obj
