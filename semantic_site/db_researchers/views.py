@@ -28,7 +28,6 @@ def researcher_types(request):
         if "researchers" in r["field"]["value"]:
             uri = r["field"]["value"][37:]
             if ("researchers" in uri): types.append(uri)
-            print(f"{count}/{length}")
     return render(request, 'researcher_types.html', {'types': types})
 
 def researcher_type(request, type):
